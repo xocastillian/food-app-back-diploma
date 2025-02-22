@@ -7,8 +7,6 @@ import {
   Body,
   Patch,
   UseGuards,
-  UsePipes,
-  ValidationPipe,
 } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { AuthGuard } from '@nestjs/passport';
@@ -24,7 +22,6 @@ export class CategoriesController {
   @Post()
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles('admin')
-  @UsePipes(new ValidationPipe())
   async create(@Body() createCategoryDto: CreateCategoryDto) {
     return this.categoriesService.create(
       createCategoryDto.name,
@@ -41,7 +38,6 @@ export class CategoriesController {
   @Patch(':id')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles('admin')
-  @UsePipes(new ValidationPipe())
   async update(
     @Param('id') id: string,
     @Body() updateCategoryDto: UpdateCategoryDto,

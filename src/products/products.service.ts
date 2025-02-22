@@ -25,8 +25,13 @@ export class ProductsService {
     });
   }
 
-  async findAll(): Promise<Product[]> {
-    return this.productModel.find().populate('categoryId').exec();
+  async findAll(page: number = 1, limit: number = 10): Promise<Product[]> {
+    return this.productModel
+      .find()
+      .populate('categoryId')
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .exec();
   }
 
   async findByCategory(categoryId: string): Promise<Product[]> {
@@ -36,7 +41,10 @@ export class ProductsService {
   }
 
   async findById(id: string): Promise<Product> {
-    const product = await this.productModel.findById(id);
+    const product = await this.productModel
+      .findById(id)
+      .populate('categoryId')
+      .exec();
     if (!product) throw new NotFoundException('Продукт не найден');
     return product;
   }
@@ -48,6 +56,12 @@ export class ProductsService {
     const updatePayload: any = { ...updateProductDto };
 
     if (updateProductDto.categoryId) {
+      const category = await this.categoriesService.findById(
+        updateProductDto.categoryId,
+      );
+      if (!category) {
+        throw new NotFoundException('Категория не найдена');
+      }
       updatePayload.categoryId = new Types.ObjectId(
         updateProductDto.categoryId,
       );

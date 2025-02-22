@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import { IsString, IsOptional, IsNumber, IsArray } from 'class-validator';
 
 export class UpdateProductDto {
@@ -11,7 +12,8 @@ export class UpdateProductDto {
 
   @IsOptional()
   @IsNumber()
-  price?: number;
+  @Type(() => Number)
+  price: number;
 
   @IsOptional()
   @IsString()

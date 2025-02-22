@@ -5,8 +5,6 @@ import {
   Get,
   Patch,
   Param,
-  UsePipes,
-  ValidationPipe,
   Delete,
   UseGuards,
   Request,
@@ -19,6 +17,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { AuthService } from 'src/auth/auth.service';
+import { AuthenticatedRequest } from 'src/types';
 
 @Controller('users')
 export class UsersController {
@@ -28,7 +27,6 @@ export class UsersController {
   ) {}
 
   @Post('register')
-  @UsePipes(new ValidationPipe())
   async register(@Body() registerDto: RegisterDto) {
     return this.usersService.create(registerDto);
   }
@@ -50,12 +48,16 @@ export class UsersController {
   async updateUser(
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
   ) {
     const user = req.user;
 
     if (user.role !== 'admin' && user.userId !== id) {
       throw new ForbiddenException('You can only update your own account');
+    }
+
+    if (user.role !== 'admin' && updateUserDto.role) {
+      throw new ForbiddenException('You are not allowed to change role');
     }
 
     return this.usersService.update(id, updateUserDto);

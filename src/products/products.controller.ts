@@ -8,8 +8,6 @@ import {
   Query,
   Body,
   UseGuards,
-  UsePipes,
-  ValidationPipe,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -25,7 +23,6 @@ export class ProductsController {
   @Post()
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles('admin')
-  @UsePipes(new ValidationPipe())
   async create(@Body() createProductDto: CreateProductDto) {
     return this.productsService.create(createProductDto);
   }
@@ -45,7 +42,6 @@ export class ProductsController {
   @Patch(':id')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles('admin')
-  @UsePipes(new ValidationPipe())
   async update(
     @Param('id') id: string,
     @Body() updateProductDto: UpdateProductDto,

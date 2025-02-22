@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Category, CategoryDocument } from './schemas/category.schema';
@@ -9,12 +14,25 @@ export class CategoriesService {
     @InjectModel(Category.name) private categoryModel: Model<CategoryDocument>,
   ) {}
 
+  private readonly logger = new Logger(CategoriesService.name);
+
   async create(
     name: string,
     slug: string,
     imageUrl?: string,
   ): Promise<Category> {
-    return this.categoryModel.create({ name, slug, imageUrl });
+    const existingCategory = await this.categoryModel.findOne({
+      $or: [{ slug }, { name }],
+    });
+    if (existingCategory) {
+      throw new ConflictException(
+        'Category with given name or slug already exists',
+      );
+    }
+
+    const category = await this.categoryModel.create({ name, slug, imageUrl });
+    this.logger.log(`Category created: ${name}`);
+    return category;
   }
 
   async findAll(): Promise<Category[]> {
@@ -33,7 +51,10 @@ export class CategoriesService {
 
   async remove(id: string): Promise<void> {
     const result = await this.categoryModel.findByIdAndDelete(id);
-    if (!result) throw new NotFoundException('Категория не найдена');
+    if (!result) {
+      throw new NotFoundException('Категория не найдена');
+    }
+    this.logger.log(`Category removed: ${id}`);
   }
 
   async update(
@@ -46,8 +67,10 @@ export class CategoriesService {
       { new: true },
     );
 
-    if (!updatedCategory) throw new NotFoundException('Категория не найдена');
-
+    if (!updatedCategory) {
+      throw new NotFoundException('Категория не найдена');
+    }
+    this.logger.log(`Category updated: ${id}`);
     return updatedCategory;
   }
 }
