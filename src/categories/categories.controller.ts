@@ -7,11 +7,15 @@ import {
   Body,
   Patch,
   UseGuards,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
+import { CreateCategoryDto } from './dto/create-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 
 @Controller('categories')
 export class CategoriesController {
@@ -20,10 +24,13 @@ export class CategoriesController {
   @Post()
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles('admin')
-  async create(
-    @Body() body: { name: string; slug: string; imageUrl?: string },
-  ) {
-    return this.categoriesService.create(body.name, body.slug, body.imageUrl);
+  @UsePipes(new ValidationPipe())
+  async create(@Body() createCategoryDto: CreateCategoryDto) {
+    return this.categoriesService.create(
+      createCategoryDto.name,
+      createCategoryDto.slug,
+      createCategoryDto.imageUrl,
+    );
   }
 
   @Get()
@@ -34,11 +41,12 @@ export class CategoriesController {
   @Patch(':id')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles('admin')
+  @UsePipes(new ValidationPipe())
   async update(
     @Param('id') id: string,
-    @Body() updateData: { name?: string; slug?: string; imageUrl?: string },
+    @Body() updateCategoryDto: UpdateCategoryDto,
   ) {
-    return this.categoriesService.update(id, updateData);
+    return this.categoriesService.update(id, updateCategoryDto);
   }
 
   @Delete(':id')

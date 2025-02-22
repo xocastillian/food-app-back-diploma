@@ -28,7 +28,7 @@ export class UsersController {
   ) {}
 
   @Post('register')
-  @UsePipes(new ValidationPipe({ whitelist: true }))
+  @UsePipes(new ValidationPipe())
   async register(@Body() registerDto: RegisterDto) {
     return this.usersService.create(registerDto);
   }
