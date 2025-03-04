@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
 export type UserDocument = User & Document;
 
@@ -16,6 +16,9 @@ export class User {
 
   @Prop({ default: null })
   refreshToken: string | null;
+
+  @Prop({ type: Types.ObjectId, ref: 'Cart', default: null })
+  cartId?: Types.ObjectId;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
