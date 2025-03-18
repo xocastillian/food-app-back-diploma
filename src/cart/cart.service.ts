@@ -4,7 +4,6 @@ import { Model, Types } from 'mongoose';
 import { Cart, CartDocument } from './schemas/cart.schema';
 import { AddItemDto } from './dto/add-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
-import { v4 as uuidv4 } from 'uuid';
 import { UsersService } from 'src/users/users.service';
 
 @Injectable()
@@ -14,40 +13,28 @@ export class CartsService {
     private readonly usersService: UsersService,
   ) {}
 
-  async getOrCreateCart(
-    userId?: string,
-    sessionId?: string,
-  ): Promise<CartDocument> {
-    if (userId) {
-      const user = await this.usersService.findById(userId);
-      if (!user) {
-        throw new NotFoundException('Пользователь не найден');
-      }
-      if (user.cartId) {
-        const cart = await this.cartModel.findById(user.cartId);
-        if (cart) {
-          return cart;
-        }
-      }
-      const newCart = await this.cartModel.create({ userId, items: [] });
-      await this.usersService.update(userId, {
-        cartId: newCart._id.toString(),
-      });
-      return newCart;
-    } else {
-      if (!sessionId) {
-        sessionId = uuidv4();
-      }
-      let cart = await this.cartModel.findOne({ sessionId });
-      if (!cart) {
-        cart = await this.cartModel.create({
-          sessionId,
-          items: [],
-          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-        });
-      }
-      return cart;
+  async getOrCreateCart(userId: string): Promise<CartDocument> {
+    const user = await this.usersService.findById(userId);
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден');
     }
+
+    if (user.cartId) {
+      const existingCart = await this.cartModel.findById(user.cartId);
+      if (existingCart) {
+        return existingCart;
+      }
+    }
+
+    const newCart = await this.cartModel.create({
+      userId: new Types.ObjectId(userId),
+      items: [],
+    });
+
+    await this.usersService.update(userId, {
+      cartId: newCart._id.toString(),
+    });
+    return newCart;
   }
 
   async addItem(cartId: string, addItemDto: AddItemDto): Promise<CartDocument> {

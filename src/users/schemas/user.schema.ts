@@ -19,6 +19,12 @@ export class User {
 
   @Prop({ type: Types.ObjectId, ref: 'Cart', default: null })
   cartId?: Types.ObjectId;
+
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'Order' }], default: [] })
+  orders: Types.ObjectId[];
+
+  @Prop({ required: true })
+  phone?: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

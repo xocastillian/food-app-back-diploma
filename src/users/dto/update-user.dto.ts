@@ -15,4 +15,8 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   cartId?: string;
+
+  @IsOptional()
+  @IsString()
+  phone?: string;
 }

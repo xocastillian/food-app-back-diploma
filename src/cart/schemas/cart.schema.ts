@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types, Schema as MongooseSchema } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
 export type CartDocument = Cart & Document;
 
@@ -11,17 +11,14 @@ export class CartItem {
 
 @Schema({ timestamps: true })
 export class Cart {
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', required: false })
-  userId?: Types.ObjectId;
-
-  @Prop({ required: false })
-  sessionId?: string;
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  userId: Types.ObjectId;
 
   @Prop({
     type: [
       {
         productId: {
-          type: MongooseSchema.Types.ObjectId,
+          type: Types.ObjectId,
           ref: 'Product',
           required: true,
         },
@@ -31,13 +28,6 @@ export class Cart {
     default: [],
   })
   items: CartItem[];
-
-  @Prop({ required: false })
-  expiresAt?: Date;
 }
 
 export const CartSchema = SchemaFactory.createForClass(Cart);
-
-CartSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
-
-CartSchema.index({ sessionId: 1 }, { unique: true, sparse: true });

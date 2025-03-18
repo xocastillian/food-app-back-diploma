@@ -59,7 +59,7 @@ export class UsersService {
     return await bcrypt.compare(plainText, hashedPassword);
   }
 
-  async findById(userId: string): Promise<User | null> {
+  async findById(userId: string): Promise<UserDocument | null> {
     return this.userModel.findById(userId).exec();
   }
 
