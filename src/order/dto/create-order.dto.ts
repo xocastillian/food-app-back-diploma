@@ -5,6 +5,8 @@ import {
   ValidateNested,
   IsNumber,
   Min,
+  IsOptional,
+  IsIn,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -33,4 +35,12 @@ export class CreateOrderDto {
   @IsString()
   @IsNotEmpty()
   phone: string;
+
+  @IsString()
+  @IsOptional()
+  address?: string;
+
+  @IsString()
+  @IsOptional()
+  recipientName?: string;
 }

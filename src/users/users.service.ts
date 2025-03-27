@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+// 1. Проверяем, есть ли пользователь с таким email
+import { Injectable, ConflictException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
@@ -11,6 +12,15 @@ export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
   async create(registerDto: RegisterDto): Promise<User> {
+    const existingUser = await this.userModel
+      .findOne({ email: registerDto.email })
+      .exec();
+    if (existingUser) {
+      throw new ConflictException(
+        'Пользователь с таким email уже зарегистрирован',
+      );
+    }
+
     const hashedPassword = await bcrypt.hash(registerDto.password, 10);
     const user = new this.userModel({
       ...registerDto,

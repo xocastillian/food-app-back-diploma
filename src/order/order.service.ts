@@ -36,8 +36,10 @@ export class OrderService {
     const orderData: Partial<Order> = {
       items,
       totalPrice,
-      status: 'pending',
+      status: 'accepted',
       phone: createOrderDto.phone,
+      address: createOrderDto.address ?? null,
+      recipientName: createOrderDto.recipientName ?? null,
     };
 
     if (userId) {
@@ -64,6 +66,17 @@ export class OrderService {
     if (!order) {
       throw new NotFoundException('Заказ не найден');
     }
+    return order;
+  }
+
+  async updateStatus(orderId: string, newStatus: string): Promise<Order> {
+    const order = await this.orderModel.findById(orderId).exec();
+    if (!order) {
+      throw new NotFoundException('Заказ не найден');
+    }
+
+    order.status = newStatus;
+    await order.save();
     return order;
   }
 }

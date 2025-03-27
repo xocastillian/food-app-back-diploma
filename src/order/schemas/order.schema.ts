@@ -12,8 +12,6 @@ export class OrderItem {
 
 @Schema({ timestamps: true })
 export class Order {
-  // Если пользователь авторизован, сюда пишем его _id
-  // Иначе null
   @Prop({ type: Types.ObjectId, ref: 'User', required: false, default: null })
   userId?: Types.ObjectId;
 
@@ -36,11 +34,17 @@ export class Order {
   @Prop({ required: true })
   totalPrice: number;
 
-  @Prop({ default: 'pending' })
+  @Prop({ default: 'accepted', enum: ['accepted', 'delivered', 'canceled'] })
   status: string;
 
   @Prop({ required: false, default: null })
   phone?: string;
+
+  @Prop({ required: false, default: null })
+  address?: string;
+
+  @Prop({ required: false, default: null })
+  recipientName?: string;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);
