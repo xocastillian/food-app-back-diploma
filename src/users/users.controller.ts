@@ -16,15 +16,11 @@ import { RegisterDto } from 'src/auth/dto/register.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
-import { AuthService } from 'src/auth/auth.service';
 import { AuthenticatedRequest } from 'src/types';
 
 @Controller('users')
 export class UsersController {
-  constructor(
-    private readonly usersService: UsersService,
-    private authService: AuthService,
-  ) {}
+  constructor(private readonly usersService: UsersService) {}
 
   @Post('register')
   async register(@Body() registerDto: RegisterDto) {
@@ -78,15 +74,5 @@ export class UsersController {
     }
 
     return this.usersService.remove(id);
-  }
-
-  @Post('refresh')
-  async refresh(@Body() body: { userId: string; refreshToken: string }) {
-    const newAccessToken = await this.authService.refreshToken(
-      body.userId,
-      body.refreshToken,
-    );
-    if (!newAccessToken) return { error: 'Invalid refresh token' };
-    return newAccessToken;
   }
 }
