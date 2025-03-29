@@ -17,9 +17,13 @@ export class RegisterDto {
 
   @IsOptional()
   @IsIn(['user', 'admin'], { message: 'Role must be either "user" or "admin"' })
-  role?: string;
+  role?: 'user' | 'admin';
 
   @IsNotEmpty()
   @IsString()
   phone?: string;
+
+  @IsNotEmpty()
+  @IsString()
+  name: string;
 }

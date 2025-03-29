@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types, Schema as MongooseSchema } from 'mongoose';
+import { OrderStatus } from 'src/types';
 
 export type OrderDocument = Order & Document;
 
@@ -35,7 +36,7 @@ export class Order {
   totalPrice: number;
 
   @Prop({ default: 'accepted', enum: ['accepted', 'delivered', 'canceled'] })
-  status: string;
+  status: OrderStatus;
 
   @Prop({ required: false, default: null })
   phone?: string;

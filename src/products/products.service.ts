@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Product, ProductDocument } from './schemas/product.schema';
@@ -19,10 +23,16 @@ export class ProductsService {
     );
     if (!category) throw new NotFoundException('Категория не найдена');
 
-    return this.productModel.create({
-      ...createProductDto,
-      categoryId: new Types.ObjectId(createProductDto.categoryId),
-    });
+    try {
+      return await this.productModel.create({
+        ...createProductDto,
+        categoryId: new Types.ObjectId(createProductDto.categoryId),
+      });
+    } catch (error) {
+      throw new BadRequestException(
+        'Ошибка при создании продукта: ' + error.message,
+      );
+    }
   }
 
   async findAll(page: number = 1, limit: number = 10): Promise<Product[]> {
@@ -31,12 +41,14 @@ export class ProductsService {
       .populate('categoryId')
       .skip((page - 1) * limit)
       .limit(limit)
+      .lean()
       .exec();
   }
 
   async findByCategory(categoryId: string): Promise<Product[]> {
     return this.productModel
       .find({ categoryId: new Types.ObjectId(categoryId) })
+      .lean()
       .exec();
   }
 

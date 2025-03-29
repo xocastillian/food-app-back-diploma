@@ -1,4 +1,3 @@
-// 1. Проверяем, есть ли пользователь с таким email
 import { Injectable, ConflictException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -6,6 +5,7 @@ import * as bcrypt from 'bcryptjs';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User, UserDocument } from './schemas/user.schema';
 import { RegisterDto } from 'src/auth/dto/register.dto';
+import { UserRole } from 'src/types';
 
 @Injectable()
 export class UsersService {
@@ -31,7 +31,7 @@ export class UsersService {
   }
 
   async findAll(): Promise<User[]> {
-    return this.userModel.find().exec();
+    return this.userModel.find().lean().exec();
   }
 
   async findOne(id: string): Promise<User | null> {
@@ -41,6 +41,7 @@ export class UsersService {
   async update(
     userId: string,
     updateUserDto: UpdateUserDto,
+    currentUserRole: UserRole,
   ): Promise<User | null> {
     const user = await this.userModel.findById(userId);
     if (!user) return null;
@@ -49,9 +50,14 @@ export class UsersService {
       updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
     }
 
-    return this.userModel
-      .findByIdAndUpdate(userId, updateUserDto, { new: true })
-      .exec();
+    if (currentUserRole !== 'admin' && 'role' in updateUserDto) {
+      delete updateUserDto.role;
+    }
+
+    return this.userModel.findByIdAndUpdate(userId, updateUserDto, {
+      new: true,
+      runValidators: true,
+    });
   }
 
   async remove(id: string): Promise<User | null> {
@@ -75,5 +81,17 @@ export class UsersService {
 
   async updateRefreshToken(userId: string, refreshToken: string) {
     return this.userModel.findByIdAndUpdate(userId, { refreshToken }).exec();
+  }
+
+  async updateCartId(userId: string, cartId: string): Promise<void> {
+    await this.userModel.findByIdAndUpdate(userId, { cartId }).exec();
+  }
+
+  async addOrderToUser(userId: string, orderId: string): Promise<void> {
+    await this.userModel
+      .findByIdAndUpdate(userId, {
+        $push: { orders: orderId },
+      })
+      .exec();
   }
 }

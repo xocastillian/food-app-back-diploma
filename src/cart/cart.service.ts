@@ -31,13 +31,14 @@ export class CartsService {
       items: [],
     });
 
-    await this.usersService.update(userId, {
-      cartId: newCart._id.toString(),
-    });
+    await this.usersService.updateCartId(userId, newCart._id.toString());
     return newCart;
   }
 
-  async addItem(cartId: string, addItemDto: AddItemDto): Promise<CartDocument> {
+  async addItem(
+    cartId: string | Types.ObjectId,
+    addItemDto: AddItemDto,
+  ): Promise<CartDocument> {
     const cart = await this.cartModel.findById(cartId);
     if (!cart) throw new NotFoundException('Cart not found');
 

@@ -39,6 +39,8 @@ export class UsersController {
   }
 
   @Get(':id')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('admin')
   async getUser(@Param('id') id: string) {
     return this.usersService.findOne(id);
   }
@@ -60,12 +62,15 @@ export class UsersController {
       throw new ForbiddenException('You are not allowed to change role');
     }
 
-    return this.usersService.update(id, updateUserDto);
+    return this.usersService.update(id, updateUserDto, user.role);
   }
 
   @Delete(':id')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
-  async deleteUser(@Param('id') id: string, @Request() req) {
+  async deleteUser(
+    @Param('id') id: string,
+    @Request() req: AuthenticatedRequest,
+  ) {
     const user = req.user;
 
     if (user.role !== 'admin' && user.userId !== id) {

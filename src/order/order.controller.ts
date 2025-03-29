@@ -15,6 +15,7 @@ import { Roles } from 'src/auth/decorators/roles.decorator';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateStatusDto } from './dto/update-order.dto';
+import { AuthenticatedRequest } from 'src/types';
 
 @Controller('orders')
 export class OrderController {
@@ -22,14 +23,14 @@ export class OrderController {
 
   @UseGuards(JwtOptionalAuthGuard)
   @Post()
-  async createOrder(@Body() createOrderDto: CreateOrderDto, @Req() req: any) {
+  async createOrder(@Body() createOrderDto: CreateOrderDto, @Req() req: AuthenticatedRequest) {
     const userId = req.user?.userId;
     return this.ordersService.createOrder(createOrderDto, userId);
   }
 
   @UseGuards(JwtOptionalAuthGuard)
   @Get()
-  async getUserOrders(@Req() req: any) {
+  async getUserOrders(@Req() req: AuthenticatedRequest) {
     const userId = req.user?.userId;
     if (!userId) {
       return [];

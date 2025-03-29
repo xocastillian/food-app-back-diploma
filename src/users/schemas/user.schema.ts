@@ -24,7 +24,10 @@ export class User {
   orders: Types.ObjectId[];
 
   @Prop({ required: true })
-  phone?: string;
+  phone: string;
+
+  @Prop({ required: true })
+  name: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

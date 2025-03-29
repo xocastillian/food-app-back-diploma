@@ -9,6 +9,7 @@ import {
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { AuthenticatedRequest } from 'src/types';
 
 @Controller('auth')
 export class AuthController {
@@ -28,7 +29,7 @@ export class AuthController {
 
   @Post('logout')
   @UseGuards(AuthGuard('jwt'))
-  async logout(@Request() req) {
+  async logout(@Request() req: AuthenticatedRequest) {
     await this.authService.logout(req.user.userId);
     return { message: 'Logged out successfully' };
   }

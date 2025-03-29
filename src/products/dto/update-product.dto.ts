@@ -13,7 +13,7 @@ export class UpdateProductDto {
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  price: number;
+  price?: number;
 
   @IsOptional()
   @IsString()

@@ -7,6 +7,8 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Category, CategoryDocument } from './schemas/category.schema';
+import { UpdateCategoryDto } from './dto/update-category.dto';
+import { CreateCategoryDto } from './dto/create-category.dto';
 
 @Injectable()
 export class CategoriesService {
@@ -16,11 +18,8 @@ export class CategoriesService {
 
   private readonly logger = new Logger(CategoriesService.name);
 
-  async create(
-    name: string,
-    slug: string,
-    imageUrl?: string,
-  ): Promise<Category> {
+  async create(dto: CreateCategoryDto): Promise<Category> {
+    const { name, slug, imageUrl } = dto;
     const existingCategory = await this.categoryModel.findOne({
       $or: [{ slug }, { name }],
     });
@@ -35,18 +34,18 @@ export class CategoriesService {
     return category;
   }
 
-  async findAll(): Promise<Category[]> {
-    return this.categoryModel.find().exec();
-  }
-
   async findById(id: string): Promise<Category> {
     const category = await this.categoryModel.findById(id);
     if (!category) throw new NotFoundException('Категория не найдена');
     return category;
   }
 
-  async findBySlug(slug: string): Promise<Category> {
-    return this.categoryModel.findOne({ slug }).exec();
+  async findAll(): Promise<Category[]> {
+    return this.categoryModel.find().lean().exec();
+  }
+
+  async findBySlug(slug: string): Promise<Category | null> {
+    return this.categoryModel.findOne({ slug }).lean().exec();
   }
 
   async remove(id: string): Promise<void> {
@@ -57,10 +56,7 @@ export class CategoriesService {
     this.logger.log(`Category removed: ${id}`);
   }
 
-  async update(
-    id: string,
-    updateData: Partial<{ name: string; slug: string; imageUrl?: string }>,
-  ): Promise<Category> {
+  async update(id: string, updateData: UpdateCategoryDto): Promise<Category> {
     const updatedCategory = await this.categoryModel.findByIdAndUpdate(
       id,
       updateData,

@@ -13,6 +13,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { AddItemDto } from './dto/add-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { CartsService } from './cart.service';
+import { AuthenticatedRequest } from 'src/types';
 
 @UseGuards(AuthGuard('jwt'))
 @Controller('cart')
@@ -20,14 +21,17 @@ export class CartsController {
   constructor(private readonly cartsService: CartsService) {}
 
   @Get()
-  async getCart(@Req() req: any) {
+  async getCart(@Req() req: AuthenticatedRequest) {
     const userId = req.user.userId;
     const cart = await this.cartsService.getOrCreateCart(userId);
     return cart;
   }
 
   @Post('items')
-  async addItem(@Body() addItemDto: AddItemDto, @Req() req: any) {
+  async addItem(
+    @Body() addItemDto: AddItemDto,
+    @Req() req: AuthenticatedRequest,
+  ) {
     const userId = req.user.userId;
     const cart = await this.cartsService.getOrCreateCart(userId);
     return this.cartsService.addItem(cart._id.toString(), addItemDto);
@@ -37,7 +41,7 @@ export class CartsController {
   async updateItem(
     @Param('itemId') itemId: string,
     @Body() updateItemDto: UpdateItemDto,
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
   ) {
     const userId = req.user.userId;
     const cart = await this.cartsService.getOrCreateCart(userId);
@@ -49,14 +53,17 @@ export class CartsController {
   }
 
   @Delete('items/:itemId')
-  async removeItem(@Param('itemId') itemId: string, @Req() req: any) {
+  async removeItem(
+    @Param('itemId') itemId: string,
+    @Req() req: AuthenticatedRequest,
+  ) {
     const userId = req.user.userId;
     const cart = await this.cartsService.getOrCreateCart(userId);
     return this.cartsService.removeItem(cart._id.toString(), itemId);
   }
 
   @Delete()
-  async clearCart(@Req() req: any) {
+  async clearCart(@Req() req: AuthenticatedRequest) {
     const userId = req.user.userId;
     const cart = await this.cartsService.getOrCreateCart(userId);
     return this.cartsService.clearCart(cart._id.toString());

@@ -23,11 +23,7 @@ export class CategoriesController {
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles('admin')
   async create(@Body() createCategoryDto: CreateCategoryDto) {
-    return this.categoriesService.create(
-      createCategoryDto.name,
-      createCategoryDto.slug,
-      createCategoryDto.imageUrl,
-    );
+    return this.categoriesService.create(createCategoryDto);
   }
 
   @Get()

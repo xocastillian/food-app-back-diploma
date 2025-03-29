@@ -4,6 +4,7 @@ import { UsersService } from '../users/users.service';
 import { UserDocument } from '../users/schemas/user.schema';
 import * as bcrypt from 'bcryptjs';
 import { Types } from 'mongoose';
+import { UserRole } from 'src/types';
 
 @Injectable()
 export class AuthService {
@@ -25,7 +26,7 @@ export class AuthService {
     return user;
   }
 
-  async login(user: UserDocument) {
+  async login(user: UserDocument & { role: UserRole }) {
     const userId = (user._id as Types.ObjectId).toString();
 
     const payload = {
@@ -43,7 +44,10 @@ export class AuthService {
     return { access_token, refresh_token, user };
   }
 
-  async refreshToken(userId: string, refreshToken: string) {
+  async refreshToken(
+    userId: string,
+    refreshToken: string,
+  ): Promise<{ access_token: string }> {
     const user = await this.usersService.findById(userId);
     if (!user || !user.refreshToken) {
       throw new UnauthorizedException('Invalid refresh token');

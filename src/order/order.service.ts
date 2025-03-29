@@ -9,6 +9,7 @@ import { Model, Types } from 'mongoose';
 import { Order, OrderDocument } from './schemas/order.schema';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UsersService } from 'src/users/users.service';
+import { OrderStatus } from 'src/types';
 
 @Injectable()
 export class OrderService {
@@ -49,9 +50,7 @@ export class OrderService {
     const newOrder = await this.orderModel.create(orderData);
 
     if (userId) {
-      await this.usersService.update(userId, {
-        $push: { orders: newOrder._id },
-      } as any);
+      await this.usersService.addOrderToUser(userId, newOrder._id.toString());
     }
 
     return newOrder;
@@ -69,7 +68,7 @@ export class OrderService {
     return order;
   }
 
-  async updateStatus(orderId: string, newStatus: string): Promise<Order> {
+  async updateStatus(orderId: string, newStatus: OrderStatus): Promise<Order> {
     const order = await this.orderModel.findById(orderId).exec();
     if (!order) {
       throw new NotFoundException('Заказ не найден');
