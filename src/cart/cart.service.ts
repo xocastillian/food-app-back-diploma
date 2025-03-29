@@ -20,7 +20,9 @@ export class CartsService {
     }
 
     if (user.cartId) {
-      const existingCart = await this.cartModel.findById(user.cartId);
+      const existingCart = await this.cartModel
+        .findById(user.cartId)
+        .populate('items.productId');
       if (existingCart) {
         return existingCart;
       }
@@ -32,7 +34,11 @@ export class CartsService {
     });
 
     await this.usersService.updateCartId(userId, newCart._id.toString());
-    return newCart;
+
+    return this.cartModel
+      .findById(newCart._id)
+      .populate('items.productId')
+      .exec();
   }
 
   async addItem(
@@ -53,7 +59,9 @@ export class CartsService {
         quantity: addItemDto.quantity,
       });
     }
-    return cart.save();
+
+    await cart.save();
+    return this.cartModel.findById(cart._id).populate('items.productId').exec();
   }
 
   async updateItem(
@@ -70,7 +78,9 @@ export class CartsService {
     if (itemIndex === -1) throw new NotFoundException('Item not found in cart');
 
     cart.items[itemIndex].quantity = updateItemDto.quantity;
-    return cart.save();
+    await cart.save();
+
+    return this.cartModel.findById(cart._id).populate('items.productId').exec();
   }
 
   async removeItem(cartId: string, itemId: string): Promise<CartDocument> {
@@ -83,7 +93,9 @@ export class CartsService {
     if (itemIndex === -1) throw new NotFoundException('Item not found in cart');
 
     cart.items.splice(itemIndex, 1);
-    return cart.save();
+    await cart.save();
+
+    return this.cartModel.findById(cart._id).populate('items.productId').exec();
   }
 
   async clearCart(cartId: string): Promise<CartDocument> {
@@ -91,6 +103,8 @@ export class CartsService {
     if (!cart) throw new NotFoundException('Cart not found');
 
     cart.items = [];
-    return cart.save();
+    await cart.save();
+
+    return this.cartModel.findById(cart._id).populate('items.productId').exec();
   }
 }
