@@ -57,11 +57,17 @@ export class OrderService {
   }
 
   async getOrdersByUser(userId: string): Promise<Order[]> {
-    return this.orderModel.find({ userId: new Types.ObjectId(userId) }).exec();
+    return this.orderModel
+      .find({ userId: new Types.ObjectId(userId) })
+      .populate('items.productId')
+      .exec();
   }
 
   async getOrderById(orderId: string): Promise<Order> {
-    const order = await this.orderModel.findById(orderId).exec();
+    const order = await this.orderModel
+      .findById(orderId)
+      .populate('items.productId')
+      .exec();
     if (!order) {
       throw new NotFoundException('Заказ не найден');
     }

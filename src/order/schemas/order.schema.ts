@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types, Schema as MongooseSchema } from 'mongoose';
+import { Document, Types } from 'mongoose';
 import { OrderStatus } from 'src/types';
 
 export type OrderDocument = Order & Document;
@@ -20,7 +20,7 @@ export class Order {
     type: [
       {
         productId: {
-          type: MongooseSchema.Types.ObjectId,
+          type: Types.ObjectId,
           ref: 'Product',
           required: true,
         },
