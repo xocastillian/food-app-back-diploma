@@ -17,14 +17,19 @@ import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { AuthenticatedRequest } from 'src/types';
+import { AuthService } from 'src/auth/auth.service';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly authService: AuthService,
+  ) {}
 
   @Post('register')
   async register(@Body() registerDto: RegisterDto) {
-    return this.usersService.create(registerDto);
+    const user = await this.usersService.create(registerDto);
+    return this.authService.login(user);
   }
 
   @Get()
@@ -36,8 +41,14 @@ export class UsersController {
 
   @Get(':id')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
-  @Roles('admin')
-  async getUser(@Param('id') id: string) {
+  @Roles('admin', 'user')
+  async getUser(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
+    const user = req.user;
+
+    if (user.role !== 'admin' && user.userId !== id) {
+      throw new ForbiddenException('You can only access your own profile');
+    }
+
     return this.usersService.findOne(id);
   }
 

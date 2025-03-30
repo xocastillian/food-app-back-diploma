@@ -11,7 +11,7 @@ import { UserRole } from 'src/types';
 export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
-  async create(registerDto: RegisterDto): Promise<User> {
+  async create(registerDto: RegisterDto): Promise<UserDocument> {
     const existingUser = await this.userModel
       .findOne({ email: registerDto.email })
       .exec();
