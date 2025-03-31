@@ -19,7 +19,7 @@ export class CategoriesService {
   private readonly logger = new Logger(CategoriesService.name);
 
   async create(dto: CreateCategoryDto): Promise<Category> {
-    const { name, slug, imageUrl } = dto;
+    const { name, slug } = dto;
     const existingCategory = await this.categoryModel.findOne({
       $or: [{ slug }, { name }],
     });
@@ -29,7 +29,7 @@ export class CategoriesService {
       );
     }
 
-    const category = await this.categoryModel.create({ name, slug, imageUrl });
+    const category = await this.categoryModel.create({ name, slug });
     this.logger.log(`Category created: ${name}`);
     return category;
   }

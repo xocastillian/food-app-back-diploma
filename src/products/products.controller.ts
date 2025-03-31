@@ -8,6 +8,10 @@ import {
   Query,
   Body,
   UseGuards,
+  UploadedFile,
+  UseInterceptors,
+  Inject,
+  BadRequestException,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -15,16 +19,44 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { AuthGuard } from '@nestjs/passport';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import * as multer from 'multer';
+import { Readable } from 'stream';
+import { v2 as cloudinary } from 'cloudinary';
 
 @Controller('products')
 export class ProductsController {
-  constructor(private readonly productsService: ProductsService) {}
+  constructor(
+    private readonly productsService: ProductsService,
+    @Inject('CLOUDINARY')
+    private readonly cloudinaryInstance: typeof cloudinary,
+  ) {}
 
   @Post()
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles('admin')
   async create(@Body() createProductDto: CreateProductDto) {
     return this.productsService.create(createProductDto);
+  }
+
+  @Post('upload-image')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('admin')
+  @UseInterceptors(FileInterceptor('file', { storage: multer.memoryStorage() }))
+  async uploadImage(@UploadedFile() file: Express.Multer.File) {
+    if (!file) throw new BadRequestException('Файл не предоставлен');
+
+    return new Promise((resolve, reject) => {
+      const uploadStream = this.cloudinaryInstance.uploader.upload_stream(
+        { folder: 'products' },
+        (error, result) => {
+          if (error) return reject(error);
+          resolve(result);
+        },
+      );
+
+      Readable.from(file.buffer).pipe(uploadStream);
+    });
   }
 
   @Get()
