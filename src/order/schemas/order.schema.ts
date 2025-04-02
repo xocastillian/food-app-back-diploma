@@ -35,7 +35,10 @@ export class Order {
   @Prop({ required: true })
   totalPrice: number;
 
-  @Prop({ default: 'accepted', enum: ['accepted', 'delivered', 'canceled'] })
+  @Prop({
+    default: 'pending',
+    enum: ['accepted', 'delivered', 'canceled', 'pending'],
+  })
   status: OrderStatus;
 
   @Prop({ required: false, default: null })

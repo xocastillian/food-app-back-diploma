@@ -17,4 +17,4 @@ export class CartItem {
   quantity: number;
 }
 
-export type OrderStatus = 'accepted' | 'delivered' | 'canceled';
+export type OrderStatus = 'accepted' | 'delivered' | 'canceled' | 'pending';

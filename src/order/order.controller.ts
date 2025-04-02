@@ -23,7 +23,10 @@ export class OrderController {
 
   @UseGuards(JwtOptionalAuthGuard)
   @Post()
-  async createOrder(@Body() createOrderDto: CreateOrderDto, @Req() req: AuthenticatedRequest) {
+  async createOrder(
+    @Body() createOrderDto: CreateOrderDto,
+    @Req() req: AuthenticatedRequest,
+  ) {
     const userId = req.user?.userId;
     return this.ordersService.createOrder(createOrderDto, userId);
   }
@@ -31,11 +34,17 @@ export class OrderController {
   @UseGuards(JwtOptionalAuthGuard)
   @Get()
   async getUserOrders(@Req() req: AuthenticatedRequest) {
-    const userId = req.user?.userId;
-    if (!userId) {
-      return [];
+    const user = req.user;
+
+    if (user?.role === 'admin') {
+      return this.ordersService.getAllOrders();
     }
-    return this.ordersService.getOrdersByUser(userId);
+
+    if (user?.userId) {
+      return this.ordersService.getOrdersByUser(user.userId);
+    }
+
+    return [];
   }
 
   @UseGuards(JwtOptionalAuthGuard)

@@ -3,6 +3,6 @@ import { OrderStatus } from 'src/types';
 
 export class UpdateStatusDto {
   @IsString()
-  @IsIn(['accepted', 'delivered', 'canceled'])
+  @IsIn(['accepted', 'delivered', 'canceled', 'pending'])
   status: OrderStatus;
 }

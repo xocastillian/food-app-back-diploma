@@ -4,6 +4,7 @@ import { Order, OrderSchema } from './schemas/order.schema';
 import { UsersModule } from '../users/users.module';
 import { OrderController } from './order.controller';
 import { OrderService } from './order.service';
+import { OrderGateway } from './order.gateway';
 
 @Module({
   imports: [
@@ -11,7 +12,7 @@ import { OrderService } from './order.service';
     forwardRef(() => UsersModule),
   ],
   controllers: [OrderController],
-  providers: [OrderService],
+  providers: [OrderService, OrderGateway],
   exports: [OrderService],
 })
 export class OrderModule {}
