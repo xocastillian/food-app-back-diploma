@@ -35,10 +35,28 @@ export class ProductsService {
     }
   }
 
-  async findAll(page: number = 1, limit: number = 10): Promise<Product[]> {
-    return this.productModel
-      .find()
-      .populate('categoryId')
+  async findAll(
+    page: number = 1,
+    limit: number = 10,
+    sort?: string,
+  ): Promise<Product[]> {
+    let query = this.productModel.find().populate('categoryId');
+
+    switch (sort) {
+      case 'priceAsc':
+        query = query.sort({ price: 1 });
+        break;
+      case 'priceDesc':
+        query = query.sort({ price: -1 });
+        break;
+      case 'new':
+        query = query.sort({ createdAt: -1 });
+        break;
+      default:
+        break;
+    }
+
+    return query
       .skip((page - 1) * limit)
       .limit(limit)
       .lean()

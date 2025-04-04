@@ -64,13 +64,14 @@ export class ProductsController {
     @Query('categoryId') categoryId?: string,
     @Query('page') page = '1',
     @Query('limit') limit = '10',
+    @Query('sort') sort?: string,
   ) {
     const pageNum = parseInt(page, 10);
     const limitNum = parseInt(limit, 10);
 
     return categoryId
       ? this.productsService.findByCategory(categoryId)
-      : this.productsService.findAll(pageNum, limitNum);
+      : this.productsService.findAll(pageNum, limitNum, sort);
   }
 
   @Get(':id')
