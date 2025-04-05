@@ -35,12 +35,24 @@ export class ProductsService {
     }
   }
 
-  async findAll(
+  async findWithFilters(
     page: number = 1,
     limit: number = 10,
+    categoryId?: string,
     sort?: string,
+    search?: string,
   ): Promise<Product[]> {
-    let query = this.productModel.find().populate('categoryId');
+    const filter: any = {};
+
+    if (categoryId) {
+      filter.categoryId = new Types.ObjectId(categoryId);
+    }
+
+    if (search) {
+      filter.name = { $regex: search, $options: 'i' };
+    }
+
+    let query = this.productModel.find(filter).populate('categoryId');
 
     switch (sort) {
       case 'priceAsc':
@@ -59,13 +71,6 @@ export class ProductsService {
     return query
       .skip((page - 1) * limit)
       .limit(limit)
-      .lean()
-      .exec();
-  }
-
-  async findByCategory(categoryId: string): Promise<Product[]> {
-    return this.productModel
-      .find({ categoryId: new Types.ObjectId(categoryId) })
       .lean()
       .exec();
   }
