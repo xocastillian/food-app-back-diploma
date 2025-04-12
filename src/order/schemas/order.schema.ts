@@ -49,6 +49,9 @@ export class Order {
 
   @Prop({ required: false, default: null })
   recipientName?: string;
+
+  @Prop({ required: true, unique: true })
+  orderNumber: string;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);

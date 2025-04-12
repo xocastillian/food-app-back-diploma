@@ -36,10 +36,16 @@ export class OrderService {
       0,
     );
 
+    let orderNumber: string;
+    do {
+      orderNumber = this.generateOrderNumber();
+    } while (await this.orderModel.exists({ orderNumber }));
+
     const orderData: Partial<Order> = {
       items,
       totalPrice,
       status: 'pending',
+      orderNumber,
       phone: createOrderDto.phone,
       address: createOrderDto.address ?? null,
       recipientName: createOrderDto.recipientName ?? null,
@@ -91,5 +97,14 @@ export class OrderService {
     order.status = newStatus;
     await order.save();
     return order;
+  }
+
+  private generateOrderNumber(): string {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = '';
+    for (let i = 0; i < 4; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
   }
 }
