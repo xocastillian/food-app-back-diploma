@@ -104,6 +104,11 @@ export class OrderService {
 
     order.status = newStatus;
     await order.save();
+
+    await order.populate('items.productId');
+
+    this.gateway.notifyOrderStatusUpdated(order);
+
     return order;
   }
 

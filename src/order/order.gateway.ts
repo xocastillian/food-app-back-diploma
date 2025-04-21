@@ -14,4 +14,8 @@ export class OrderGateway {
   notifyNewOrder(order: Order) {
     this.server.emit('order:new', order);
   }
+
+  notifyOrderStatusUpdated(order: Order) {
+    this.server.emit('order:status-updated', order);
+  }
 }
