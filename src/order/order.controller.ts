@@ -7,6 +7,8 @@ import {
   Param,
   UseGuards,
   Patch,
+  Query,
+  BadRequestException,
 } from '@nestjs/common';
 import { JwtOptionalAuthGuard } from 'src/auth/guards/jwt-optional.guard';
 import { AuthGuard } from '@nestjs/passport';
@@ -31,10 +33,17 @@ export class OrderController {
     return this.ordersService.createOrder(createOrderDto, userId);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtOptionalAuthGuard)
   @Get()
-  async getUserOrders(@Req() req: AuthenticatedRequest) {
-    return this.ordersService.getOrdersByUser(req.user.userId);
+  async getUserOrders(
+    @Req() req: AuthenticatedRequest,
+    @Query('userId') userIdQuery?: string,
+  ) {
+    const userId = req.user?.userId ?? userIdQuery;
+    if (!userId) {
+      throw new BadRequestException('userId обязателен для получения заказов');
+    }
+    return this.ordersService.getOrdersByUser(userId);
   }
 
   @UseGuards(AuthGuard('jwt'), RolesGuard)

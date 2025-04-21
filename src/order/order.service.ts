@@ -51,14 +51,18 @@ export class OrderService {
       recipientName: createOrderDto.recipientName ?? null,
     };
 
-    if (userId) {
-      orderData.userId = new Types.ObjectId(userId);
+    const finalUserId = userId ?? createOrderDto.userId;
+    if (finalUserId) {
+      orderData.userId = new Types.ObjectId(finalUserId);
     }
 
     const newOrder = await this.orderModel.create(orderData);
 
-    if (userId) {
-      await this.usersService.addOrderToUser(userId, newOrder._id.toString());
+    if (finalUserId) {
+      await this.usersService.addOrderToUser(
+        finalUserId,
+        newOrder._id.toString(),
+      );
     }
 
     this.gateway.notifyNewOrder(newOrder);
@@ -74,7 +78,11 @@ export class OrderService {
   }
 
   async getAllOrders(): Promise<Order[]> {
-    return this.orderModel.find().populate('items.productId').exec();
+    return this.orderModel
+      .find()
+      .populate('items.productId')
+      .populate('userId')
+      .exec();
   }
 
   async getOrderById(orderId: string): Promise<Order> {

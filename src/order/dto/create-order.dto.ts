@@ -26,6 +26,10 @@ class CreateOrderItemDto {
 }
 
 export class CreateOrderDto {
+  @IsString()
+  @IsOptional()
+  userId?: string;
+
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CreateOrderItemDto)
