@@ -120,4 +120,9 @@ export class OrderService {
     }
     return result;
   }
+
+  async hasNewOrders(): Promise<{ hasNew: boolean }> {
+    const count = await this.orderModel.countDocuments({ status: 'pending' });
+    return { hasNew: count > 0 };
+  }
 }

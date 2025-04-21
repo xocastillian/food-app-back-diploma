@@ -68,4 +68,11 @@ export class OrderController {
   ) {
     return this.ordersService.updateStatus(orderId, dto.status);
   }
+
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('admin')
+  @Get('admin/has-new')
+  async hasNewOrders() {
+    return this.ordersService.hasNewOrders();
+  }
 }
